@@ -1,0 +1,46 @@
+{
+    "manufacturer": "yanghu",
+    "keyboard_name": "8BitDo Button Adapter",
+    "maintainer": "yanghu",
+    "processor": "RP2040",
+    "bootloader": "rp2040",
+    "debounce": 10,
+    "usb": {
+        "vid": "0xFEED",
+        "pid": "0x8B01",
+        "device_version": "1.0.0"
+    },
+    "matrix_pins": {
+        "direct": [
+            ["GP6", "GP7", "GP0", "GP1", "GP2", "GP4"]
+        ]
+    },
+    "features": {
+        "bootmagic": false,
+        "extrakey": true,
+        "mousekey": true,
+        "nkro": true,
+        "rgblight": true
+    },
+    "ws2812": {
+        "pin": "GP12",
+        "driver": "vendor"
+    },
+    "rgblight": {
+        "led_count": 1,
+        "max_brightness": 100,
+        "sleep": true
+    },
+    "layouts": {
+        "LAYOUT": {
+            "layout": [
+                { "label": "Btn A", "matrix": [0, 0], "x": 0, "y": 0.75, "w": 1.5, "h": 1.5 },
+                { "label": "Btn B", "matrix": [0, 1], "x": 1.75, "y": 0.75, "w": 1.5, "h": 1.5 },
+                { "label": "Up",    "matrix": [0, 2], "x": 5, "y": 0 },
+                { "label": "Down",  "matrix": [0, 3], "x": 5, "y": 2 },
+                { "label": "Left",  "matrix": [0, 4], "x": 4, "y": 1 },
+                { "label": "Right", "matrix": [0, 5], "x": 6, "y": 1 }
+            ]
+        }
+    }
+}

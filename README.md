@@ -25,10 +25,13 @@ Compact, screwless, 3D-printed inline USB-C HID adapter box for **8BitDo Dual Su
 - [`cad/verify_and_render.py`](cad/verify_and_render.py) — Automated 32-point B-Rep collision check, STL manifold verification, and cross-section blueprint renderer.
 - `cad/export/` — Print-ready support-free `.stl` files (`bottom_tray.stl`, `bottom_tray_no_magnets.stl`, `top_lid.stl`, `snap_fit_test_coupon.stl`) and `.step` files (`assembly_preview.step`, etc.).
 - `cad/renders/` — Orthographic, isometric, cross-section, and detail zoom engineering inspection sheets.
+- [`firmware/README.md`](firmware/README.md) — QMK / Vial flashing, LED color legend, and `vial.rocks` setup guide.
+- [`firmware/keyboards/button_adapter/`](firmware/keyboards/button_adapter/) — QMK / Vial keyboard definition for Seeed Studio XIAO RP2040 (`keyboard.json`, `button_adapter.c`, `keymaps/vial/`, `keymaps/default/`).
+- [`.github/workflows/build-firmware.yml`](.github/workflows/build-firmware.yml) — Automated GitHub Actions workflow that builds and uploads `button_adapter_vial.uf2` and `button_adapter_default.uf2`.
 
 ## Project Roadmap
 
 - [x] **Phase 1: Requirements & Hardware Spec Finalization** — Locked MCU, 3.5mm TRS jacks, QMK/Vial architecture, L2 inline screwless enclosure spec, US BOM, and wiring guide.
 - [x] **Phase 2: Parametric 3D CAD Enclosure (`build123d`)** — Built `cad/enclosure.py`, verified `0.0000 mm³` collision against official Seeed XIAO RP2040 STEP + jack/magnet keep-outs, and exported print-ready `.stl`/`.step` files.
-- [ ] **Phase 3: QMK / Vial Firmware & CI** — Generate QMK/Vial keyboard definition for XIAO RP2040 (`direct_pins`), dual-OS layers, WS2812B indicator, and GitHub Actions `.uf2` build workflow.
-- [ ] **Phase 4: Bench Assembly & Validation** — Print enclosure, solder harness, flash `.uf2`, verify all 6 inputs via Vial key tester.
+- [x] **Phase 3: QMK / Vial Firmware & CI** — Generated QMK/Vial keyboard definition for XIAO RP2040 (`direct_pins`), dual-OS macOS/Windows layers, WS2812B layer indicator, and GitHub Actions `.uf2` build workflow.
+- [ ] **Phase 4: Bench Assembly & Validation** — Print enclosure, solder harness, flash `.uf2`, verify all 6 inputs via Vial Matrix Tester.
