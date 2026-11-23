@@ -370,8 +370,11 @@ def run_verification() -> tuple[bool, dict]:
         cfg.outer_l / 2.0 - abs(cfg.magnet_positions[0][1]) - cfg.magnet_pocket_dia / 2.0 - cfg.bottom_chamfer,
     )
     snap_wall_behind = cfg.wall_thickness - cfg.snap_pocket_depth
-    nut_vert_clear = (cfg.cavity_height - cfg.jack_inner_nut_dia) / 2.0
-    nut_gap_x = cfg.jack_pitch_x - cfg.jack_inner_nut_dia
+    max_jack_inner_dia = max(cfg.jack_inner_nut_dia, cfg.jack_body_od)
+    max_jack_dia = max(max_jack_inner_dia, cfg.jack_outer_flange_dia)
+    min_jack_pitch = min(cfg.jack_gaps_x) if cfg.jack_gaps_x else cfg.jack_pitch_x
+    jack_vert_clear = (cfg.cavity_height - max_jack_inner_dia) / 2.0
+    jack_gap_x = min_jack_pitch - max_jack_dia
     led_septum = abs(cfg.pin_r_xy[0] - cfg.led_xy[0]) - cfg.pinhole_dia / 2.0 - cfg.led_open_dia / 2.0
     # Cantilever bending strain eps = 1.5 * t * delta / L^2
     l_beam = cfg.snap_z_land_bot  # root to catch land ~9.1mm
@@ -380,8 +383,8 @@ def run_verification() -> tuple[bool, dict]:
     check("Solid floor above 12x3mm magnets (>=1.05mm)", mag_floor_above >= 1.049, f"{mag_floor_above:.2f} mm")
     check("Magnet outer rim at Z=0 chamfer (>=3.0mm)", mag_rim_z0 >= 3.0, f"{mag_rim_z0:.2f} mm")
     check("Solid wall behind snap pockets (>=1.8mm)", snap_wall_behind >= 1.8, f"{snap_wall_behind:.2f} mm")
-    check("M8 hex nut vertical clearance (>=1.0mm)", nut_vert_clear >= 1.0, f"{nut_vert_clear:.2f} mm top & bottom")
-    check("Adjacent M8 hex nut spacing (>=3.5mm)", nut_gap_x >= 3.5, f"{nut_gap_x:.2f} mm gap")
+    check("Jack body/nut vertical clearance (>=1.0mm)", jack_vert_clear >= 1.0, f"{jack_vert_clear:.2f} mm top & bottom")
+    check("Adjacent jack min body/nut gap (>=3.0mm)", jack_gap_x >= 3.0, f"{jack_gap_x:.2f} mm min gap (pitches={cfg.jack_gaps_x})")
     check("LED-to-pinhole septum wall (>=1.2mm)", led_septum >= 1.2, f"{led_septum:.2f} mm")
     check("Snap-fit cantilever elastic strain (<=1.6%)", snap_strain_pct <= 1.6, f"{snap_strain_pct:.2f}% (PLA yield ~2.0%, PETG ~4.0%)")
 
@@ -409,7 +412,8 @@ def run_verification() -> tuple[bool, dict]:
         check(f"STL manifold: {fname}", wt and abs(mesh.bounds[0][2]) < 0.02, detail)
 
     print("\n6. Alternate Jack Preset Smoke & Collision Checks")
-    for preset in ("switchcraft_35prm3", "tensility_54_00081"):
+    alt_presets = [k for k in enc.JACK_PRESETS.keys() if k != cfg.jack_preset]
+    for preset in alt_presets:
         p_alt = copy.deepcopy(enc.PARAMS)
         p_alt["jack_preset"] = preset
         c_alt = enc.resolve_config(p_alt)
@@ -511,13 +515,14 @@ def generate_renders(report: dict) -> list[Path]:
         xlabel="X (mm)",
         ylabel="Y (mm)",
     )
-    # 3. Open Tray Interior (+Z looking down; XIAO cradle, relief channels, 3x M8 jacks)
+    # 3. Open Tray Interior (+Z looking down; XIAO cradle, relief channels, 3x 3.5mm jacks)
+    pitch_str = " / ".join(f"{g:.1f}" for g in cfg.jack_gaps_x) + " mm"
     render_camera_shaded(
         axes[0, 2],
         [(m_tray, "#5C7898"), (m_xiao, "#268755"), (m_jacks, "#D4A63C")],
         view_from=(0.0, 0.0, 1.0),
         up_hint=(0.0, 1.0, 0.0),
-        title="3. Open Tray Interior (+Z: XIAO Cradle & 3x M8 Jacks)",
+        title=f"3. Open Tray Interior (+Z: XIAO Cradle & 3x Jacks [{pitch_str}])",
         xlabel="X (mm)",
         ylabel="Y (mm)",
     )
@@ -531,23 +536,23 @@ def generate_renders(report: dict) -> list[Path]:
         xlabel="-X (mm)",
         ylabel="Z (mm)",
     )
-    # 5. Rear Face (-Y looking toward +Y: bare 3x M8 truncated teardrop holes)
+    # 5. Rear Face (-Y looking toward +Y: bare 3x jack mounting holes)
     render_camera_shaded(
         axes[1, 1],
         [(m_tray, "#5C7898"), (m_lid, "#789BC0")],
         view_from=(0.0, -1.0, 0.0),
         up_hint=(0.0, 0.0, 1.0),
-        title="5. Rear Face (-Y: 3x M8 Truncated Teardrop Holes)",
+        title=f"5. Rear Face (-Y: 3x Ø{cfg.jack_hole_dia:.2f}mm Holes, Pitch {pitch_str})",
         xlabel="X (mm)",
         ylabel="Z (mm)",
     )
-    # 6. Right Side (+X looking toward -X: flush seam, pry notch, outer jack flanges)
+    # 6. Right Side (+X looking toward -X: flush seam, pry notch, outer jack nuts)
     render_camera_shaded(
         axes[1, 2],
         [(m_tray, "#5C7898"), (m_lid, "#789BC0"), (m_jacks, "#D4A63C")],
         view_from=(1.0, 0.0, 0.0),
         up_hint=(0.0, 0.0, 1.0),
-        title="6. Right Side (+X: Flush Seam, Pry Notch & Jack Flange)",
+        title="6. Right Side (+X: Flush Seam, Pry Notch & Outer Jack Nut)",
         xlabel="Y (mm)",
         ylabel="Z (mm)",
     )
@@ -570,12 +575,12 @@ def generate_renders(report: dict) -> list[Path]:
         y=0.98,
     )
 
-    # Panel 1: Closed Isometric (Rear-Right 3/4 view showing 3x M8 jacks, labels 1/2/3, pry notch)
+    # Panel 1: Closed Isometric (Rear-Right 3/4 view showing 3x jacks, labels 1/2/3, pry notch)
     render_camera_shaded(
         axes[0, 0],
         [(m_tray, "#5C7898"), (m_lid, "#789BC0"), (m_xiao, "#268755"), (m_jacks, "#D4A63C")],
         view_from=(0.68, -0.78, 0.62),
-        title="1. Closed Assembly (Rear-Right 3/4: 3x M8 Jacks, Labels & Pry Notch)",
+        title=f"1. Closed Assembly (Rear-Right 3/4: 3x {cfg.jack_preset}, Labels 1/2/3)",
     )
 
     # Panel 2: Exploded Isometric (Front-Right 3/4 showing USB-C, XIAO, jacks, magnets)
@@ -629,12 +634,13 @@ def generate_renders(report: dict) -> list[Path]:
         y=0.98,
     )
 
+    sec_d_y = cfg.y_rear_inner + (1.0 if cfg.jack_inner_nut_thick > 0 else 4.0)
     sec_specs = [
         (
             axes[0, 0],
-            "Section A-A (X = 0): USB-C, XIAO Shield Boss, WS2812B LED Pipe & Center Jack #2",
+            "Section A-A (X = 0): USB-C, XIAO Shield Boss, WS2812B LED Pipe & Wiring Bay",
             Plane(origin=(0, 0, 0), x_dir=(0, 1, 0), z_dir=(1, 0, 0)),
-            "Y (mm)  [-Y Rear Jack  --->  +Y Front USB-C]",
+            "Y (mm)  [-Y Rear Wall  --->  +Y Front USB-C]",
             "Z (mm)",
             (-cfg.outer_l / 2.0 - 5.5, cfg.outer_l / 2.0 + 3.0),
             (-1.5, cfg.outer_h + 2.5),
@@ -659,9 +665,9 @@ def generate_renders(report: dict) -> list[Path]:
         ),
         (
             axes[1, 1],
-            f"Section D-D (Y = {cfg.y_rear_inner + 1.0:.2f}): 3x Internal M8 Hex Nuts & Rear Corner Magnets",
-            Plane(origin=(0, cfg.y_rear_inner + 1.0, 0), x_dir=(1, 0, 0), z_dir=(0, -1, 0)),
-            "X (mm)  [3x M8 Hex Nuts @ 16.5mm Pitch]",
+            f"Section D-D (Y = {sec_d_y:.2f}): 3x {cfg.jack_preset} Bodies & Rear Corner Magnets",
+            Plane(origin=(0, sec_d_y, 0), x_dir=(1, 0, 0), z_dir=(0, -1, 0)),
+            f"X (mm)  [J1-J2 / J2-J3 Pitch: {pitch_str}]",
             "Z (mm)",
             (-cfg.outer_w / 2.0 - 2.0, cfg.outer_w / 2.0 + 2.0),
             (-1.5, cfg.outer_h + 2.5),

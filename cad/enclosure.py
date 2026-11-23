@@ -72,13 +72,37 @@ from build123d import (
 # =============================================================================
 
 JACK_PRESETS: dict[str, dict[str, Any]] = {
-    # DEFAULT: Amazon Front-Mount M8 3.5mm Stereo TRS Panel Jack
+    # DEFAULT: PJ-392A M6x0.5 Rear-Mount 3.5mm Stereo TRS Panel Jack
+    # (M6x0.5 x 4.5mm threaded barrel, Ø8.0x1.8mm outer knurled nut,
+    #  Ø8.0x11.8mm inner body + 6.5mm max solder lug = 18.3mm behind panel;
+    #  asymmetric pitch: J1-J2 = 15.5mm for single Super Buttons plug,
+    #  J2-J3 = 11.9mm locked to 8BitDo Super Stick rigid dual-plug)
+    "pj392a_m6_trs": {
+        "jack_mount_style": "rear_mount",
+        "jack_hole_dia": 6.45,             # M6 (6.0mm) + 0.45mm for FDM clearance & +/-0.2mm self-centering
+        "jack_pitch_x": 11.9,              # Fallback uniform pitch if num_jacks != 3
+        "jack_pitches_x": [15.5, 11.9],    # J1-J2: 15.5mm (single plug), J2-J3: 11.9mm (Super Stick dual plug)
+        "jack_behind_panel_depth": 20.5,   # 11.8mm body + 6.5mm longest lug + 2.2mm solder/wire bend margin
+        "jack_wall_thickness": 2.3,        # 4.5mm thread - 2.3mm wall = 2.2mm outside for 1.8mm knurled nut
+        "jack_outer_flange_dia": 8.0,      # Outer knurled nut OD (Ø8.0mm)
+        "jack_outer_flange_len": 2.2,      # Exposed thread + 1.8mm nut outside rear wall
+        "jack_inner_nut_dia": 8.0,         # Rear-mount: inner shoulder/body OD is Ø8.0mm
+        "jack_inner_nut_thick": 0.0,       # Nut mounts outside the panel
+        "jack_body_od": 8.2,               # Ø8.0 +/- 0.15mm body -> 8.2mm conservative keep-out
+        "jack_body_len_inside": 11.8,      # 5.6mm metal collar + 6.2mm plastic sleeve
+        "jack_lug_envelope_dia": 7.0,      # 3x solder lugs within Ø8.0mm body envelope
+        "jack_lug_len": 6.5,               # Longest solder lug (6.5mm)
+        "cavity_height": 15.0,             # Preserves verified snap-fit geometry & generous wire room
+        "wiring_bay_depth": 15.0,          # 15.0mm open bay beyond 20.5mm lug+solder keep-out
+    },
+    # Alternate: Amazon Front-Mount M8 3.5mm Stereo TRS Panel Jack
     # (Ø10.2x3.3mm outer flange, Ø7.8mm M8x0.75 barrel, ~4.5mm thread,
     #  internal M8 hex nut Ø12.5x2.2mm, Ø7.0x10.3mm inner body + 4.5mm lugs)
     "amazon_m8_trs": {
         "jack_mount_style": "front_mount",
         "jack_hole_dia": 8.2,              # Ø7.8mm barrel + 0.4mm FDM clearance
         "jack_pitch_x": 16.5,              # >=4.0mm gap between internal M8 hex nuts
+        "jack_pitches_x": None,
         "jack_behind_panel_depth": 16.5,   # 10.3mm body + 4.5mm lugs + 1.7mm solder margin
         "jack_wall_thickness": 2.4,        # Leaves ~2.1mm thread inside for M8 hex nut
         "jack_outer_flange_dia": 10.2,
@@ -97,6 +121,7 @@ JACK_PRESETS: dict[str, dict[str, Any]] = {
         "jack_mount_style": "rear_mount",
         "jack_hole_dia": 6.35,             # M6 + 0.35mm FDM clearance
         "jack_pitch_x": 16.0,
+        "jack_pitches_x": None,
         "jack_behind_panel_depth": 22.0,   # Body + solder lugs + heat-shrink keepout
         "jack_wall_thickness": 2.8,
         "jack_outer_flange_dia": 9.5,      # Knurled brass nut OD outside panel
@@ -115,6 +140,7 @@ JACK_PRESETS: dict[str, dict[str, Any]] = {
         "jack_mount_style": "front_mount",
         "jack_hole_dia": 9.6,              # M9 + 0.6mm FDM clearance
         "jack_pitch_x": 18.0,              # Wrench clearance for internal M9 hex nut
+        "jack_pitches_x": None,
         "jack_behind_panel_depth": 18.5,
         "jack_wall_thickness": 2.4,
         "jack_outer_flange_dia": 11.5,
@@ -141,7 +167,7 @@ DEFAULT_XIAO_STEP_PATH = Path(
 PARAMS: dict[str, Any] = {
     # --- Hardware presets ---
     "mcu_type": "xiao_rp2040",               # Seeed Studio XIAO RP2040 (21.1 x 17.8 mm)
-    "jack_preset": "amazon_m8_trs",          # "amazon_m8_trs" | "switchcraft_35prm3" | "tensility_54_00081" | "custom"
+    "jack_preset": "pj392a_m6_trs",          # "pj392a_m6_trs" | "amazon_m8_trs" | "switchcraft_35prm3" | "tensility_54_00081" | "custom"
     "num_jacks": 3,                          # 3 default (scales parametrically)
     "port_layout": "L2_inline",              # Opposite faces: 3x 3.5mm (-Y) vs USB-C (+Y)
 
@@ -160,21 +186,22 @@ PARAMS: dict[str, Any] = {
     "mcu_led_xy": (0.00, -9.00),             # Center WS2812B LED relative to PCB center
 
     # --- Custom jack overrides (used ONLY when jack_preset == "custom") ---
-    "jack_mount_style": "front_mount",
-    "jack_hole_dia": 8.2,
-    "jack_pitch_x": 16.5,
-    "jack_behind_panel_depth": 16.5,
-    "jack_wall_thickness": 2.4,
-    "jack_outer_flange_dia": 10.2,
-    "jack_outer_flange_len": 3.3,
-    "jack_inner_nut_dia": 12.5,
-    "jack_inner_nut_thick": 2.2,
-    "jack_body_od": 7.2,
-    "jack_body_len_inside": 10.3,
-    "jack_lug_envelope_dia": 7.6,
-    "jack_lug_len": 4.5,
+    "jack_mount_style": "rear_mount",
+    "jack_hole_dia": 6.45,
+    "jack_pitch_x": 11.9,
+    "jack_pitches_x": [15.5, 11.9],          # Optional per-gap list (len = num_jacks - 1); None -> uniform jack_pitch_x
+    "jack_behind_panel_depth": 20.5,
+    "jack_wall_thickness": 2.3,
+    "jack_outer_flange_dia": 8.0,
+    "jack_outer_flange_len": 2.2,
+    "jack_inner_nut_dia": 8.0,
+    "jack_inner_nut_thick": 0.0,
+    "jack_body_od": 8.2,
+    "jack_body_len_inside": 11.8,
+    "jack_lug_envelope_dia": 7.0,
+    "jack_lug_len": 6.5,
     "cavity_height": 15.0,
-    "wiring_bay_depth": 16.9,
+    "wiring_bay_depth": 15.0,
 
     # --- Enclosure geometry & FDM tolerances ---
     "wall_thickness": 2.8,                   # Side & front wall thickness
@@ -261,9 +288,25 @@ def resolve_config(params: dict[str, Any] | None = None) -> SimpleNamespace:
     cfg.z_lid_inner = round(cfg.z_floor + cfg.cavity_height, 4)
     cfg.outer_h = round(cfg.z_lid_inner + cfg.lid_thickness, 4)
 
+    # 3.5mm jack X coordinates (supports asymmetric per-gap jack_pitches_x centered on X = 0)
+    custom_pitches = getattr(cfg, "jack_pitches_x", None)
+    if custom_pitches is not None and len(custom_pitches) == cfg.num_jacks - 1:
+        raw_xs = [0.0]
+        for gap in custom_pitches:
+            raw_xs.append(raw_xs[-1] + float(gap))
+        mid_x = (raw_xs[0] + raw_xs[-1]) / 2.0
+        cfg.jack_xs = [round(x - mid_x, 4) for x in raw_xs]
+        cfg.jack_gaps_x = [round(float(g), 4) for g in custom_pitches]
+    else:
+        cfg.jack_xs = [
+            round((i - (cfg.num_jacks - 1) / 2.0) * cfg.jack_pitch_x, 4)
+            for i in range(cfg.num_jacks)
+        ]
+        cfg.jack_gaps_x = [round(float(cfg.jack_pitch_x), 4)] * max(0, cfg.num_jacks - 1)
+
     # Outer & inner width (X)
-    jack_span_half = ((cfg.num_jacks - 1) / 2.0) * cfg.jack_pitch_x
-    side_margin = max(cfg.jack_inner_nut_dia / 2.0 + 4.45, 10.2)
+    jack_span_half = (cfg.jack_xs[-1] - cfg.jack_xs[0]) / 2.0 if cfg.jack_xs else 0.0
+    side_margin = max(max(cfg.jack_inner_nut_dia, cfg.jack_body_od) / 2.0 + 4.45, 10.2)
     cfg.inner_half_x = round(max(jack_span_half + side_margin, cfg.mcu_wid_x / 2.0 + 12.0), 4)
     cfg.inner_w = round(2.0 * cfg.inner_half_x, 4)
     cfg.outer_w = round(cfg.inner_w + 2.0 * cfg.wall_thickness, 4)
@@ -300,12 +343,6 @@ def resolve_config(params: dict[str, Any] | None = None) -> SimpleNamespace:
     cfg.pin_r_xy = (cfg.mcu_reset_xy[0], round(cfg.y_mcu_center + cfg.mcu_reset_xy[1], 4))
     cfg.pin_b_xy = (cfg.mcu_boot_xy[0], round(cfg.y_mcu_center + cfg.mcu_boot_xy[1], 4))
     cfg.led_xy = (cfg.mcu_led_xy[0], round(cfg.y_mcu_center + cfg.mcu_led_xy[1], 4))
-
-    # 3.5mm jack X coordinates
-    cfg.jack_xs = [
-        round((i - (cfg.num_jacks - 1) / 2.0) * cfg.jack_pitch_x, 4)
-        for i in range(cfg.num_jacks)
-    ]
 
     # Snap-fit Y centers (2 per side, clear of rear hex nuts and central pry notch)
     snap_y_offset = min(13.5, cfg.inner_l / 2.0 - 11.5)
@@ -1001,6 +1038,9 @@ def export_all(
     print(
         f"  XIAO center Y    : {cfg.y_mcu_center:.2f} mm | R={cfg.pin_r_xy}, LED={cfg.led_xy}, B={cfg.pin_b_xy}"
     )
+    print(
+        f"  Jack X coords    : {cfg.jack_xs} mm | gaps={cfg.jack_gaps_x} mm | hole=Ø{cfg.jack_hole_dia:.2f} mm"
+    )
 
     tray = build_bottom_tray(cfg)
     lid = build_top_lid(cfg)
@@ -1059,7 +1099,7 @@ def main() -> None:
         "--preset",
         choices=list(JACK_PRESETS.keys()) + ["custom"],
         default=None,
-        help="Override jack_preset from PARAMS (default: amazon_m8_trs).",
+        help="Override jack_preset from PARAMS (default: pj392a_m6_trs).",
     )
     args = parser.parse_args()
     export_all(preset=args.preset)

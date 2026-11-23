@@ -34,20 +34,20 @@ The 3D CAD agent shall produce the following inside `cad/`:
 
 ### 2.2 3.5mm TRS Panel-Mount Jacks (×3)
 
-#### Primary Default: **Switchcraft `35PRM3`** (All-Metal Brass, Rear-Mount)
-- **Official SolidWorks Customer Drawing**: [`https://www.mouser.com/datasheet/2/393/35PRM3_CD-2943019.pdf`](https://www.mouser.com/datasheet/2/393/35PRM3_CD-2943019.pdf) (also available as EDA/CAD STEP on DigiKey `6695851`).
-- **Extracted Key Dimensions**:
-  - Thread: **`M6 × 0.75`** → nominal outer diameter `6.0 mm` → **FDM mounting hole = `Ø 6.35 mm`** (`jack_hole_dia`)
-  - Knurled Brass Nut: **`Ø 9.5 mm`** (`0.37"`), thickness **`2.2 mm`** (`0.09"`)
-  - Body OD Behind Panel: **`Ø 7.9 mm`** (`0.31"`)
-  - Overall Length (front to rear lug tips): **`26.1 mm`** (`1.03"` REF)
-  - Threaded Bushing Length: **`6.3 mm`** (`0.25"`) → **CRITICAL CHECK FOR CAD AGENT**: Visually verify the exact maximum panel thickness from `35PRM3_CD.pdf` (threaded section minus nut thickness + washer/shoulder). Design `jack_wall_thickness = 2.8 mm` by default, with an optional parameterized inner counterbore (`jack_wall_local_thickness`) in case the verified clamping max is `< 2.8 mm`!
-  - Behind-Panel Keep-Out Envelope (including solder lugs + heat-shrink): cylinder **`Ø 10.0 mm`** × **`22.0 mm`** deep from the inner face of the rear wall.
+#### Primary Default: **`PJ-392A` M6×0.5 Rear-Mount 3.5mm TRS Stereo Jack** (`pj392a_m6_trs`)
+- **Why Primary**: Matches the tight **`11.9–12.0 mm`** rigid dual-plug spacing of the **8BitDo Super Stick** with zero nut/body interference (`3.9 mm` clear gap between adjacent `Ø 8.0 mm` outer knurled nuts and inner bodies), rear-mount assembly allows clean external soldering before mounting, and low `2.2 mm` outer protrusion clears the dual-plug plastic shroud.
+- **Verified Drawing Dimensions**:
+  - Thread: **`M6 × 0.5`** × **`4.5 mm`** length → **FDM mounting hole = `Ø 6.45 mm`** (`+0.45 mm` clearance provides `±0.2 mm` self-centering play per jack so Ports 2 & 3 auto-align when tightening nuts with the Super Stick dual-plug inserted!)
+  - External Knurled Nut: **`Ø 8.0 mm`** × **`1.8 mm`** thick (`2.3 mm` rear wall leaves `2.2 mm` exposed thread outside)
+  - Body OD Behind Panel: **`Ø 8.0 ± 0.15 mm`** (`8.2 mm` keep-out) × **`11.8 mm`** long (`5.6 mm` metal collar + `6.2 mm` black sleeve)
+  - Solder Lugs: 3-pin TRS stereo, longest lug **`6.5 mm`** (`18.3 mm` total behind panel → **`20.5 mm`** keep-out with solder/wire-bend margin)
+  - **Asymmetric Rear Spacing**: **`J1–J2 = 15.5 mm`** (single Dual Super Buttons plug), **`J2–J3 = 11.9 mm`** (8BitDo Super Stick rigid dual-plug), centered on `X = 0` → `jack_xs = [-13.7, +1.8, +13.7] mm`.
 
-#### Alternate Supported Preset: **Tensility `54-00081`** (All-Metal Brass, Front-Mount)
-- **Official Product & 3D STEP**: [`https://www.tensility.com/products/54-00081`](https://www.tensility.com/products/54-00081)
-- **Key Dimensions**: `M9 × 0.75` thread, panel hole `Ø 9.6 mm`, overall length **`20.5 mm`** (shorter!), rear internal M9 hex nut + lockwasher → requires wider pitch (`17.5–18.0 mm`) and internal nut wrench clearance.
-- **Requirement**: The parametric script MUST support switching `jack_preset = "switchcraft_35prm3" | "tensility_54_00081" | "custom"`!
+#### Alternate Supported Presets (`cad/enclosure.py`)
+- **`amazon_m8_trs`**: Front-mount M8×0.75 (`Ø 7.8 mm` barrel → `Ø 8.2 mm` hole, `Ø 10.2 × 3.3 mm` front collar, internal M8 hex nut `Ø 12.5 mm`, uniform `16.5 mm` pitch).
+- **`switchcraft_35prm3`**: Rear-mount all-metal brass `M6 × 0.75` (`Ø 6.35 mm` hole, `Ø 9.5 × 2.2 mm` knurled nut, `22.0 mm` behind-panel keep-out, uniform `16.0 mm` pitch).
+- **`tensility_54_00081`**: Front-mount all-metal brass `M9 × 0.75` (`Ø 9.6 mm` hole, internal M9 hex nut, `18.5 mm` behind-panel keep-out, uniform `18.0 mm` pitch).
+- **Requirement**: The parametric script supports switching `jack_preset = "pj392a_m6_trs" | "amazon_m8_trs" | "switchcraft_35prm3" | "tensility_54_00081" | "custom"`!
 
 ### 2.3 Bottom Neodymium Magnets (×4, Toggleable)
 - **Default Spec**: **`Ø 12.0 × 3.0 mm`** circular disc magnets (user-owned hardware; parameterized via `enable_bottom_magnets`, `magnet_dia`, and `magnet_height` so v1 can also be exported without magnets).
@@ -69,29 +69,29 @@ Adopt a right-handed Cartesian frame with origin `(0, 0, 0)` at the **bottom-cen
           ┌──────────────────────────────────────────┐
           │ [Mag]     ┌──── USB-C Shroud ────┐ [Mag] │  <- Recessed USB-C boot pocket
           │           │   ┌──────────────┐   │       │
-          │           │   │ XIAO RP2040  │   │       │  <- Retention cradle + lid ribs
-          │           │   │  (B) ● (R)   │   │       │     (● = WS2812B LED window)
+          │           │   │ XIAO RP2040  │   │       │  <- Retention cradle + lid boss
+          │           │   │  (R) ● (B)   │   │       │     (● = WS2812B LED window)
           │           │   └──────────────┘   │       │
           │                                          │
-          │           Open Wiring Bay (~13mm)        │  <- Fan-out 26-28 AWG silicone wires
+          │           Open Wiring Bay (15.0 mm)      │  <- Fan-out 26-28 AWG silicone wires
           │                                          │
-          │       ┌───┐      ┌───┐      ┌───┐        │
-          │       │J1 │      │J2 │      │J3 │        │  <- 3x Switchcraft 35PRM3
-          │ [Mag] │   │      │   │      │   │  [Mag] │     (Pitch = 16.0 mm)
-          └───────┴───┴──────┴───┴──────┴───┴────────┘
-                    1          2          3
+          │     ┌───┐          ┌───┐     ┌───┐       │
+          │     │J1 │          │J2 │     │J3 │       │  <- 3x PJ-392A M6 (Asymmetric:
+          │[Mag]│   │          │   │     │   │ [Mag] │     J1-J2=15.5mm, J2-J3=11.9mm)
+          └─────┴───┴──────────┴───┴─────┴───┴───────┘
+                  1              2         3
                         -Y (Rear: 3.5mm TRS)
 ```
 
-### Target Outer Dimensional Budget (Default: `switchcraft_35prm3` + `12×3 mm` magnets)
+### Finalized Outer Dimensional Budget (Default: `pj392a_m6_trs` + `12×3 mm` magnets)
 
-| Axis | Breakdown | Target Outer Dimension |
+| Axis | Breakdown | Final Outer Dimension |
 | :--- | :--- | :---: |
-| **Width (`X`)** | 3 jacks @ `16.0 mm` pitch (`32.0 mm` center span) + `2 × 10.0 mm` outer jack-to-inner-wall margin + `2 × 2.8 mm` walls | **`~58.0 mm`** |
-| **Length (`Y`)** | Front wall (`2.8 mm`) + XIAO pocket (`21.5 mm`) + wiring bay (`13.0 mm`) + `35PRM3` behind-panel (`22.0 mm`) + rear jack wall (`2.8 mm`) | **`~64.0 mm`** |
-| **Height (`Z`)** | Bottom floor (`4.2 mm` incl. `3.15 mm` magnet recess + `1.05 mm` ceiling; or `2.6 mm` without magnets) + internal cavity (`13.8 mm`) + top lid (`2.4 mm`) | **`~20.4 mm`** (or **`~18.8 mm`** without magnets) |
+| **Width (`X`)** | 3 jacks @ `15.5 / 11.9 mm` pitch (`27.4 mm` outer span, `X = -13.7 / +1.8 / +13.7 mm`) + `2 × 10.2 mm` side margin + `2 × 2.8 mm` walls | **`53.4 mm`** |
+| **Length (`Y`)** | Front wall (`2.8 mm`) + XIAO pocket (`21.4 mm`) + wiring bay (`15.0 mm`) + `PJ-392A` behind-panel (`20.5 mm`) + rear jack wall (`2.3 mm`) | **`62.0 mm`** |
+| **Height (`Z`)** | Bottom floor (`4.2 mm` incl. `3.15 mm` magnet recess + `1.05 mm` ceiling; or `2.6 mm` without magnets) + internal cavity (`15.0 mm`) + top lid (`2.4 mm`) | **`21.6 mm`** (or **`20.0 mm`** without magnets) |
 
-> **4× Corner Magnet Collision Check (`12×3 mm`)**: At `58 × 64 mm`, placing the 4 bottom magnets (`Ø 12.25 mm`) centered at `X = ±19.5 mm`, `Y = ±22.5 mm` leaves `≥ 3.3 mm` solid perimeter rim on every outer edge (`29 - 19.5 - 6.125 = 3.375 mm` in X; `32 - 22.5 - 6.125 = 3.375 mm` in Y). Because magnets reside strictly inside `Z ∈ [0, 3.15]` with solid floor up to `Z = 4.2 mm`, they have **zero vertical or horizontal interference** with the XIAO cradle or the 3.5mm jacks!
+> **4× Corner Magnet Collision Check (`12×3 mm`)**: At `53.4 × 62.0 mm`, placing the 4 bottom magnets (`Ø 12.25 mm`) with `10.5 mm` edge inset leaves `≥ 3.375 mm` solid perimeter rim on every outer edge even at the `Z = 0` chamfer. Because magnets reside strictly inside `Z ∈ [0, 3.15]` with solid floor up to `Z = 4.2 mm`, they have **zero vertical or horizontal interference** with the XIAO cradle or the 3.5mm jacks!
 
 ---
 
