@@ -29,12 +29,13 @@ The XIAO RP2040's central WS2812B NeoPixel (`GP12`, powered by `GP11`) glows gen
 
 | Layer | Name | LED Color | Out-of-the-Box Function |
 | :---: | :--- | :--- | :--- |
-| **0** | **macOS** *(Default)* | **Calm Blue** | Btn A: `Option+Space` (Voice/PTT) · Btn B: `Cmd+Shift+A` (Mute) · Stick: PgUp/PgDn/PrevTab/NextTab |
-| **1** | **Windows** | **Calm Green** | Btn A: `Win+H` (Voice/PTT) · Btn B: `Ctrl+Shift+M` (Mute) · Stick: PgUp/PgDn/PrevTab/NextTab |
+| **0** | **macOS** *(Default)* | **Calm Blue** | Raw HID `F17` / `F18` / `F13`–`F16` for [Hammerspoon](../hammerspoon/button_adapter.lua) (Btn A: App-aware Voice · Btn B: Background Google Meet · Stick: Spaces/Mission Control) |
+| **1** | **Windows** | **Calm Green** | Standalone direct shortcuts: Btn A: `Ctrl+M` (Antigravity Voice) · Btn B: `Enter` (Send) · Stick: `Win+Tab` / `Win+D` / `Ctrl+Win+←/→` |
 | **2** | **Meeting / Media** | **Warm Amber** | Btn A: `KC_MUTE` · Btn B: Play/Pause · Stick: Vol+/Vol-/Prev/Next |
 | **3** | **Custom** | **Soft Purple** | Transparent (`KC_TRNS`) — ready for your own Vial macros |
 
 - **Switching macOS ↔ Windows**: Press **Button A + Button B simultaneously** (seeded into Vial Combo slots 0 & 1 on first boot; fully editable or removable in Vial!).
+- **macOS Host Setup**: See [`docs/HOST_INTEGRATION.md`](../docs/HOST_INTEGRATION.md) for loading [`hammerspoon/button_adapter.lua`](../hammerspoon/button_adapter.lua).
 
 ---
 

@@ -21,27 +21,34 @@ enum adapter_layers {
     _EXTRA,
 };
 
-// Default Vibe Coding keycodes (all live-editable in https://vial.rocks)
-#define MAC_VOICE     LOPT(KC_SPC)         // Superwhisper / Wispr Flow Push-to-Talk
-#define MAC_MUTE      LGUI(LSFT(KC_A))     // macOS Zoom / Meet Mute Toggle (or remap to KC_MUTE)
-#define MAC_PREV_TAB  LGUI(LSFT(KC_LBRC))  // Previous Tab / Reject Diff
-#define MAC_NEXT_TAB  LGUI(LSFT(KC_RBRC))  // Next Tab / Accept Diff
+// Default keycodes (all live-editable in https://vial.rocks):
+//   - Layer 0 (_MAC): emits raw F13-F18 for host-side Hammerspoon routing
+//     (see hammerspoon/button_adapter.lua & docs/HOST_INTEGRATION.md)
+//   - Layer 1 (_WIN): standalone Windows shortcuts (zero host software required)
+#define MAC_BTN_A      KC_F17              // Hammerspoon: App-aware Voice (Antigravity / Claude / Gemini)
+#define MAC_BTN_B      KC_F18              // Hammerspoon: Background Google Meet (Tap=Mute, Hold=Hand)
+#define MAC_STICK_UP   KC_F13              // Hammerspoon: Mission Control
+#define MAC_STICK_DN   KC_F15              // Hammerspoon: App Exposé
+#define MAC_STICK_LFT  KC_F14              // Hammerspoon: Previous Space
+#define MAC_STICK_RGT  KC_F16              // Hammerspoon: Next Space
 
-#define WIN_VOICE     LWIN(KC_H)           // Windows Voice Typing / PTT
-#define WIN_MUTE      LCTL(LSFT(KC_M))     // Windows Teams / Meet Mute Toggle
-#define WIN_PREV_TAB  LCTL(KC_PGUP)        // Previous Tab
-#define WIN_NEXT_TAB  LCTL(KC_PGDN)        // Next Tab
+#define WIN_BTN_A      LCTL(KC_M)          // Antigravity Voice Input Toggle (Ctrl+M)
+#define WIN_BTN_B      KC_ENT              // Enter (send right after dictation)
+#define WIN_STICK_UP   LGUI(KC_TAB)        // Task View (Win+Tab)
+#define WIN_STICK_DN   LGUI(KC_D)          // Show / Toggle Desktop (Win+D)
+#define WIN_STICK_LFT  LCTL(LGUI(KC_LEFT)) // Previous Virtual Desktop (Ctrl+Win+Left)
+#define WIN_STICK_RGT  LCTL(LGUI(KC_RGHT)) // Next Virtual Desktop (Ctrl+Win+Right)
 
 // LAYOUT order: (Btn A [GP6], Btn B [GP7], Stick Up [GP0], Stick Down [GP1], Stick Left [GP2], Stick Right [GP4])
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_MAC] = LAYOUT(
-        MAC_VOICE,    MAC_MUTE,     KC_PGUP,      KC_PGDN,      MAC_PREV_TAB, MAC_NEXT_TAB
+        MAC_BTN_A,    MAC_BTN_B,    MAC_STICK_UP, MAC_STICK_DN, MAC_STICK_LFT, MAC_STICK_RGT
     ),
     [_WIN] = LAYOUT(
-        WIN_VOICE,    WIN_MUTE,     KC_PGUP,      KC_PGDN,      WIN_PREV_TAB, WIN_NEXT_TAB
+        WIN_BTN_A,    WIN_BTN_B,    WIN_STICK_UP, WIN_STICK_DN, WIN_STICK_LFT, WIN_STICK_RGT
     ),
     [_MEETING] = LAYOUT(
-        KC_MUTE,      KC_MPLY,      KC_VOLU,      KC_VOLD,      KC_MPRV,      KC_MNXT
+        KC_MUTE,      KC_MPLY,      KC_VOLU,      KC_VOLD,      KC_MPRV,       KC_MNXT
     ),
     [_EXTRA] = LAYOUT(
         KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS,      KC_TRNS
@@ -57,12 +64,12 @@ void keyboard_post_init_user(void) {
     if (eeconfig_read_user() != USER_EECONFIG_SEED_MAGIC) {
         // Combo 0: Press Button A + Button B on macOS layer -> toggle Windows layer (LED turns Green)
         const vial_combo_entry_t mac_to_win = {
-            .input  = { MAC_VOICE, MAC_MUTE, KC_NO, KC_NO },
+            .input  = { MAC_BTN_A, MAC_BTN_B, KC_NO, KC_NO },
             .output = TG(_WIN),
         };
         // Combo 1: Press Button A + Button B on Windows layer -> toggle back to macOS layer (LED turns Blue)
         const vial_combo_entry_t win_to_mac = {
-            .input  = { WIN_VOICE, WIN_MUTE, KC_NO, KC_NO },
+            .input  = { WIN_BTN_A, WIN_BTN_B, KC_NO, KC_NO },
             .output = TG(_WIN),
         };
 

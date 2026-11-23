@@ -7,9 +7,9 @@
 // For daily use, flash the `vial` keymap instead (`button_adapter_vial.uf2`).
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT(
-        LOPT(KC_SPC), LGUI(LSFT(KC_A)), KC_PGUP, KC_PGDN, LGUI(LSFT(KC_LBRC)), LGUI(LSFT(KC_RBRC))
+        KC_F17,     KC_F18, KC_F13,       KC_F15,     KC_F14,              KC_F16
     ),
     [1] = LAYOUT(
-        LWIN(KC_H),   LCTL(LSFT(KC_M)), KC_PGUP, KC_PGDN, LCTL(KC_PGUP),       LCTL(KC_PGDN)
+        LCTL(KC_M), KC_ENT, LGUI(KC_TAB), LGUI(KC_D), LCTL(LGUI(KC_LEFT)), LCTL(LGUI(KC_RGHT))
     ),
 };
