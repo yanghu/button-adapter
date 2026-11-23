@@ -15,6 +15,16 @@ Compact, screwless, 3D-printed inline USB-C HID adapter box for **8BitDo Dual Su
 | **Enclosure Fastening** | **Screwless Cantilever Snap-Fit Lid** (4× 45°-ramped support-free clips + 2× side pry notches + 5-min test coupon) |
 | **Enclosure Features** | `BOOT` & `RESET` guided pinholes, engraved `1 / 2 / 3` + `R / B` labels, WS2812B LED light tunnel, toggleable 4× bottom `12 × 3 mm` neodymium magnet recesses |
 
+## 3D Enclosure Visual Preview (`build123d`)
+
+| Orthographic Views (Top / Bottom / Interior / Ports) | Isometric Assembly, Print Orientation & 5-Min Test Coupon |
+| :---: | :---: |
+| ![Orthographic Views](cad/renders/01_orthographic_views.png) | ![Isometric Open & Closed](cad/renders/02_isometric_open_closed.png) |
+
+| Exact B-Rep Cross-Section Blueprints | Zoomed Details (Snap-Fit / Magnet Pocket / USB-C Recess) |
+| :---: | :---: |
+| ![Cross-Section Blueprints](cad/renders/03_cross_sections.png) | ![Detail Zooms](cad/renders/04_detail_zooms.png) |
+
 ## Documentation & CAD Map
 
 - [`docs/DESIGN_SPEC.md`](docs/DESIGN_SPEC.md) — Finalized system architecture, electrical topology, pin map, and QMK/Vial dual-OS keymap spec.
